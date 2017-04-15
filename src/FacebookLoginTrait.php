@@ -28,7 +28,7 @@ trait FacebookLoginTrait {
                 $fb->setDefaultAccessToken($request->get('fb_token'));
 
                 // Attempt to get the user object from Facebook
-                $response = $fb->get('/me?locale=en_AU&fields=first_name,last_name,email');
+                $response = $fb->get('/me?locale=en_AU&fields=first_name,last_name,email,picture.height(300)');
                 $fbUser = $response->getDecodedBody();
 
                 // Check that we have an existing user matching the email address
@@ -38,8 +38,9 @@ trait FacebookLoginTrait {
                 if (!$user) {
                     // User does not exist, create user automatically
                     $user = new $userModel();
-                    $user->first_name = $fbUser['first_name'];
-                    $user->last_name = $fbUser['last_name'];
+                    $user->name = $fbUser['first_name'].' '.$fbUser['last_name'];
+                    $user->picture = $fbUser['picture'];
+                    $user->fb_app_id = $fbUser['id'];
                     $user->email = $fbUser['email'];
                     $user->password = uniqid('fb_', true); // We need to give them a password, generate a random one
                     $user->save();
